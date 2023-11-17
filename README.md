@@ -1,36 +1,34 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
-## Getting Started
 
-First, run the development server:
 
-```bash
+# PurrfectPets
+Discover your ideal furry companion at PurrfectPets – the ultimate destination for pet adoption. Customize your preferences, and witness a delightful array of adorable pets right at your fingertips. Express your affection by liking your favorite pets, and with a simple click, we'll guide you to the PetFinder website, connecting you directly with the shelter or owner. Your journey to finding the perfect pet begins here.
+
+![](<src/assets/Screenshot 2023-11-09 at 1.53.01 PM.png>)
+# How to run
+### This is the link to the website 
+- https://www.purrfectpets.app/
+### To run from local host
+- clone repo
+- get API keys from PetFinder
+- store the keys in a file called ``.env``
+- set up ``.env`` like this ```VITE_API_KEY = {your api key}``` ```VITE_API_SECRET = {your secret key}```
+- In your terminal type:
+```
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+click on http://localhost:5173/
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+# How to contribute
+Follow this project board to know the latest status of the project: [https://github.com/orgs/cis3296f23/projects/118](https://github.com/orgs/cis3296f23/projects/118)  
+- 
+### How to build
+- Clone this github repository:
+- Create your own branch off of Production or Dev. Please don't work off Production or Dev. These branches are protected, any pushes to these branches will be void.
+- Use any IDE of your choice.
+- Before you can start running the application, please follow the steps in 'How to run'
+- As of right there no specified libraries you need to install
+- Application started correctly when you can see a collection of cute dogs.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+click http://localhost:5173/
