@@ -1,62 +1,80 @@
 // Dependencies
 // =============================================================
-import fs from 'fs'
-import path from 'path'
-import { fileURLToPath } from 'url'
 import express from 'express';
 import cors from 'cors';
 import router from './utils/controller.js';
-import { createServer as createViteServer } from 'vite'
+import fs from 'node:fs/promises'
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
+// Constants
+const isProduction = process.env.NODE_ENV === 'production'
+const port = process.env.PORT || 5173
+const base = process.env.BASE || '/'
 
-// Sets up the Express App
-// =============================================================
-async function createServer() {
-  const app = express();
-  const vite = await createViteServer({
+// Cached production assets
+const templateHtml = isProduction
+  ? await fs.readFile('./dist/client/index.html', 'utf-8')
+  : ''
+const ssrManifest = isProduction
+  ? await fs.readFile('./dist/client/ssr-manifest.json', 'utf-8')
+  : undefined
+
+// Create http server
+const app = express()
+
+
+
+// Add Vite or respective production middlewares
+let vite
+if (!isProduction) {
+  const { createServer } = await import('vite')
+  vite = await createServer({
     server: { middlewareMode: true },
-    appType: 'custom'
+    appType: 'custom',
+    base
   })
-
-  app.use((req, res, next) => {
-    vite.middlewares.handle(req, res, next)
-  })
-
-  const PORT = process.env.PORT || 3000;
-
-  // Sets up the Express app to handle data parsing
-  app.use(cors());
-  app.use(express.json());
-  app.use(router);
-
-  // Static directory to be served
-  app.use('*', async (req, re, next) => {
-    const url = req.originalUrl
-
-    try {
-      // 1. Read index.html
-      let template = fs.readFileSync(
-        path.resolve(__dirname, 'index.html'),
-        'utf-8',
-      )
-      template = await vite.transformIndexHtml(url, template)
-
-      const { render } = await vite.ssrLoadModule('/src/main.jsx')
-      const appHtml = await render(url)
-      const html = template.replace(`<!--ssr-outlet-->`, appHtml)
-
-      res.status(200).set({ 'Content-Type': 'text/html' }).end(html)
-    } catch (e) {
-      vite.ssrFixStacktrace(e)
-      next(e)
-    }
-  })
-
-  // LISTENER
-  app.listen(PORT, function () {
-    console.log("App listening on PORT: " + PORT);
-  });
+  app.use(vite.middlewares)
+} else {
+  const compression = (await import('compression')).default
+  const sirv = (await import('sirv')).default
+  app.use(compression())
+  app.use(base, sirv('./dist/client', { extensions: [] }))
 }
 
-createServer();
+// Sets up the Express app to handle data parsing
+app.use(cors())
+app.use(express.json())
+app.use(router)
+
+// Serve HTML
+app.use('*', async (req, res) => {
+  try {
+    const url = req.originalUrl.replace(base, '')
+    let template
+    let render
+    if (!isProduction) {
+      // Always read fresh template in development
+      template = await fs.readFile('./index.html', 'utf-8')
+      template = await vite.transformIndexHtml(url, template)
+      render = (await vite.ssrLoadModule('/src/entry-server.jsx')).render
+    } else {
+      template = templateHtml
+      render = (await import('./dist/server/entry-server.js')).render
+    }
+
+    const rendered = await render(url, ssrManifest)
+    const html = template
+      .replace(`<!--app-head-->`, rendered.head ?? '')
+      .replace(`<!--app-html-->`, rendered.html ?? '')
+
+    res.status(200).set({ 'Content-Type': 'text/html' }).end(html)
+  } catch (e) {
+    vite?.ssrFixStacktrace(e)
+    console.log(e.stack)
+    res.status(500).end(e.stack)
+  }
+})
+
+// Start http server
+app.listen(port, () => {
+  console.log(`Server started at http://localhost:${port}`)
+})

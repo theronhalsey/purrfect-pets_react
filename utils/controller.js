@@ -3,9 +3,9 @@ import Petfinder from'./Petfinder.js'
 
 const router = express.Router();
 
-router.get("/getPets", async (req, res) => {
+router.get("/Petfinder/GetPets/:page", async (req, res) => {
     try {
-        const pets = await Petfinder.getPets();
+        const pets = await Petfinder.getPets(req.params.page);
         res.send(pets)
     } catch (err) {
         res.status(500).send("Petfinder API error");
