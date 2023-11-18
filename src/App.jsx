@@ -10,7 +10,7 @@ function App() {
   const [pets, setPets] = useState([]);
   const [currentPetIndex, setCurrentPetIndex] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
-  const [userPreferences, setUserPreferences] = useState([]);
+  //const [userPreferences, setUserPreferences] = useState([]);
 
   useEffect(() => {
     fetch(`/Petfinder/getPets/${currentPage}`)
@@ -30,19 +30,19 @@ function App() {
   };
 
   const handleDislike = () => {
-    setUserPreferences([...userPreferences, { id: pets[currentPetIndex].id, preference: 'dislike' }])
+    //setUserPreferences([...userPreferences, { id: pets[currentPetIndex].id, preference: 'dislike' }])
     nextPet();
   }
   const handleLike = () => {
-    setUserPreferences([...userPreferences, { id: pets[currentPetIndex].id, preference: 'like' }])
+    //setUserPreferences([...userPreferences, { id: pets[currentPetIndex].id, preference: 'like' }])
     nextPet();
   }
-
+/*
   //console log userPreferences
   useEffect(() => {
     console.log(userPreferences)
   }, [userPreferences]) //only runs when userPreferences changes, console log userPreferences
-
+*/
 
   return (
     <>
