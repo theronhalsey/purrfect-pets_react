@@ -2,6 +2,10 @@ import dotenv from 'dotenv'
 dotenv.config();
 
 let accessToken = '';
+const userPrefs = 203;
+
+const animalTypes = ['Dog', 'Cat', 'Rabbit', 'Small-Furry', 'Horse', 'Bird', 'Scales-Fins-Other', 'Barnyard'];
+const userAnimals = animalTypes.filter((curr, i, arr) => {return userPrefs & 2**i})
 
 export const Petfinder = {
     async getAccessToken() {
@@ -18,29 +22,54 @@ export const Petfinder = {
         const expiresIn = jsonResponse.expires_in;
         setTimeout(() => accessToken = '', expiresIn);
     },
-    async getPets(page=1) {
+    async getPets(page = 1) {
         if (accessToken === '') {
-            await Petfinder.getAccessToken()
+            await this.getAccessToken()
         }
-        const requestURL = `https://api.petfinder.com/v2/animals?page=${page}`;
+        let randType = userAnimals[Math.floor(Math.random()*userAnimals.length)];
+        const requestURL = `https://api.petfinder.com/v2/animals?type=${randType}&page=${page}`;
         return fetch(requestURL, {
             headers: {
                 'Authorization': `Bearer ${accessToken}`,
             }
         })
-        .then(response => {
-            if(!response.ok) {
-                throw new Error('Request failed!');
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Request failed!');
+                }
+                return response.json();
+            })
+            .then(data => {
+                return data.animals;
+            })
+            .catch(error => {
+                console.error('Error fetching pets: ', error);
+                return [];
+            });
+    },
+    async getTypes() {
+        if (accessToken === '') {
+            await this.getAccessToken()
+        }
+        const requestURL = `https://api.petfinder.com/v2/types`;
+        return fetch(requestURL, {
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
             }
-            return response.json();
         })
-        .then(data => {
-            return data.animals;
-        })
-        .catch(error => {
-            console.error('Error fetching pets: ', error);
-            return [];
-        });
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Request failed!');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log(data);
+            })
+            .catch(error => {
+                console.error('Error fetching types: ', error);
+                return [];
+            });
     }
 }
 
