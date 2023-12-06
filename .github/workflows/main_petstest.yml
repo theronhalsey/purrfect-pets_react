@@ -58,5 +58,5 @@ jobs:
         with:
           app-name: 'petstest'
           slot-name: 'Production'
-          package: ./dist
+          package: .
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_FFBD2EBDED464D44B3E65A03876F29F8 }}
