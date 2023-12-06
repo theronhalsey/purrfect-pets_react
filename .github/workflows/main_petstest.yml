@@ -9,11 +9,6 @@ on:
       - main
   workflow_dispatch:
 
-env:
-  AZURE_WEBAPP_NAME: petstest    # set this to your application's name
-  AZURE_WEBAPP_PACKAGE_PATH: './dist'      # set this to the path to your web app project, defaults to the repository root
-  NODE_VERSION: '20.x'  
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -63,5 +58,5 @@ jobs:
         with:
           app-name: 'petstest'
           slot-name: 'Production'
-          package: .
+          package: ./dist
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_FFBD2EBDED464D44B3E65A03876F29F8 }}
