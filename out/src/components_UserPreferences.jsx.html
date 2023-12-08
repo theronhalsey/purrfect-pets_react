@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: components/UserPreferences.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: components/UserPreferences.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React from "react"
+import { useState, useEffect, useRef } from 'react'
+import './UserPreferences.css'
+
+let preference_list = [];
+
+/**
+ * The User Preferences component of the application. A dropdown list consisting of types and animals and their attributes.
+ * The user can click on them to filter what the website shows so they only see the pets they're looking for.
+ * @component
+ */
+const UserPreferences = (props) => {
+
+  const [open, setOpen] = useState(false);
+  const [display, setDisplay] = useState('none')
+
+  let checkList = ["Dog", "Cat", "Rabbit", "Small &amp; Furry", "Horse", "Bird", "Scales Fins &amp; Other",
+    "Barnyard", "Good with Children", "Good with Dogs", "Good with Cats", "House Trained", "Special Needs"];
+  const [checked, setChecked] = useState([]);
+
+   /**
+   * Adds or removes a checked or unchecked item to and from the list of checked items.
+   *
+   * @param {Object} event - The list of user preferences.
+   * @function
+   */
+  const handleCheck = (event) => {
+    var updatedList = [...checked];
+    if (event.target.checked) {
+      updatedList = [...checked, event.target.value];
+    } else {
+      updatedList.splice(checked.indexOf(event.target.value), 1);
+    }
+    setChecked(updatedList);
+  };
+
+  /**
+   * Returns items based on whether or not the item is checked
+   * @param {Object} item - The item in the checklist.
+   * @function
+   */
+  const isChecked = (item) =>
+    checked.includes(item) ? "checked-item" : "not-checked-item";
+
+  // Generates a string of checked items
+  var checkedItems = checked.length
+    ? checked.reduce((total, item) => {
+      return total + ", " + item;
+    })
+    : "";
+
+   /**
+   * Submits a list of all checked items. Function fires when the user clicks on "Submit Preferences"
+   * @function
+   */
+  const handleSubmit = () => {
+    props.onSubmit(preference_list);
+  };
+ /**
+   * Opens and closes the User Preferences menu when the user clicks on it.
+   * @function
+   */
+  function handleClick() {
+    if (display == 'none') {
+      setDisplay('block')
+    } else {
+      setDisplay('none')
+    }
+  }
+
+  let menuRef = useRef();
+
+   /**
+   * Unused function that closes the menu when the user clicks outside of it. Doesn't really work for some reason.
+   * @function
+   */
+  useEffect(() => {
+    let handler = (e) => {
+      if (!menuRef.current.contains(e.target)) {
+        setOpen(false);
+        console.log(menuRef.current);
+      }
+    };
+
+    document.addEventListener("mousedown", handler);
+
+    return () => {
+      document.removeEventListener("mousedown", handler);
+    }
+  });
+
+  return (
+    &lt;div className="UserPreferences">
+      &lt;div className='Menu' ref={menuRef}>
+        &lt;div className='Dropdown' onClick={handleClick}>
+          &lt;h3> User Preferences &lt;/h3>
+        &lt;/div>
+        &lt;div className={`dropdown-menu ${open ? 'active' : 'inactive'}`} style={{ display: display }}>
+          &lt;ul>
+            {checkList.map((item, index) => (
+              &lt;div key={index}>
+                &lt;input value={item} type="checkbox" onChange={handleCheck} />
+                &lt;span className={isChecked(item)}>{item}&lt;/span>
+              &lt;/div>
+            ))}
+          &lt;/ul>
+          &lt;div onClick={handleSubmit}>
+            &lt;Element name="Set Preference" preferences={checkedItems}>&lt;/Element>
+          &lt;/div>
+        &lt;/div>
+      &lt;/div>
+    &lt;/div>
+  );
+}
+
+  /**
+   * The submission button for the User Preferences menu. Sets the preferences that the user selects.
+   *
+   * @param {Object} props - List of checked items.
+   */
+
+function Element(props) {
+  return (
+    &lt;div>
+      &lt;div className="Dropdown" onClick={() => pref_changer(props.preferences)}> Set Preferences&lt;/div>
+    &lt;/div>
+  )}
+
+  /**
+   * Changes the list of preferences to only contain the checked items the user selected.
+   *
+   * @param {Array} pref_list - The list of user preferences.
+   * @function
+   */
+const pref_changer = (new_preferences) => {
+  preference_list = new_preferences.split(", ");
+  for (var i = 0; i &lt; preference_list.length; i++) {
+    if (preference_list[i] == "Scales Fins &amp; Other") { preference_list[i] = "Scales, Fins &amp; Other" };
+    if (preference_list[i] == "Good with Children") { preference_list[i] = "good_with_children" };
+    if (preference_list[i] == "Good with Dogs") { preference_list[i] = "good_with_dogs" };
+    if (preference_list[i] == "Good with Cats") { preference_list[i] = "good_with_cats" };
+    if (preference_list[i] == "House Trained") { preference_list[i] = "house_trained" };
+    if (preference_list[i] == "Special Needs") { preference_list[i] = "special_needs" };
+  }
+}
+
+export { preference_list };
+export { Element };
+export default UserPreferences;</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#Account">Account</a></li><li><a href="global.html#App">App</a></li><li><a href="global.html#arePasswordsEqual">arePasswordsEqual</a></li><li><a href="global.html#checkEmailAvailability">checkEmailAvailability</a></li><li><a href="global.html#checkUsernameAvailability">checkUsernameAvailability</a></li><li><a href="global.html#decodeHtmlEntity">decodeHtmlEntity</a></li><li><a href="global.html#detectTabKeyDown">detectTabKeyDown</a></li><li><a href="global.html#Element">Element</a></li><li><a href="global.html#emailOnChange">emailOnChange</a></li><li><a href="global.html#emailValue">emailValue</a></li><li><a href="global.html#fetchUserData">fetchUserData</a></li><li><a href="global.html#fetchUserEmail">fetchUserEmail</a></li><li><a href="global.html#fetchUserUsername">fetchUserUsername</a></li><li><a href="global.html#getPreferences">getPreferences</a></li><li><a href="global.html#handleCancel">handleCancel</a></li><li><a href="global.html#handleDislike">handleDislike</a></li><li><a href="global.html#handleLike">handleLike</a></li><li><a href="global.html#handleSave">handleSave</a></li><li><a href="global.html#Likes">Likes</a></li><li><a href="global.html#LocationGetter">LocationGetter</a></li><li><a href="global.html#LoginSignup">LoginSignup</a></li><li><a href="global.html#NavBar">NavBar</a></li><li><a href="global.html#nextPet">nextPet</a></li><li><a href="global.html#password2OnChange">password2OnChange</a></li><li><a href="global.html#passwordDatabaseCheck">passwordDatabaseCheck</a></li><li><a href="global.html#passwordOnChange">passwordOnChange</a></li><li><a href="global.html#passwordValue">passwordValue</a></li><li><a href="global.html#passwordValue2">passwordValue2</a></li><li><a href="global.html#pref_changer">pref_changer</a></li><li><a href="global.html#SideBar">SideBar</a></li><li><a href="global.html#toggleModal">toggleModal</a></li><li><a href="global.html#updateInfo">updateInfo</a></li><li><a href="global.html#usernameOnChange">usernameOnChange</a></li><li><a href="global.html#usernameValue">usernameValue</a></li><li><a href="global.html#UserPreferences">UserPreferences</a></li><li><a href="global.html#validInfo">validInfo</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Dec 08 2023 14:44:33 GMT+0000 (Coordinated Universal Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: components/AccountComponents/Account.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: components/AccountComponents/Account.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React from "react";
+import { useState,useEffect, useRef } from "react";
+import './Account.scss'
+import SideBar from "./Sidebar";
+import FaceIcon from '@mui/icons-material/Face';
+import bcrypt from 'bcryptjs';
+import {render} from 'react-dom';
+
+
+/**
+ * Account component for the account page that shows the user information.
+ * @component
+ * @returns {JSX.Element} The rendered Account component.
+ */
+
+function Account(){
+
+    const hasRender = useRef(false);
+
+    //original user info on the page
+    const [userName, getUsername] = useState('')
+    const [email, getEmail] = useState('')
+    const [userID, getUserID] = useState('')
+    const [password, getPassword] = useState('')
+    const [salt, getSalt] = useState('')
+    
+
+    
+    //user info added to the input boxes
+
+    const [newUsername, setNewUsername] = useState('')
+    const [newEmail,setNewEmail] = useState('')
+    const [newPassword,setNewPassword] = useState('')
+    const [verifyNewPassword, checkVerifyNewPassword] = useState('')
+
+    //send these to the DB
+    const[updateUsername, setUpdateUsername] = useState('')
+    const[updateEmail, setUpdateEmail] = useState('')
+    const [newHash, setNewHash] = useState('')
+
+    //salt for the new password
+    const [newSalt,setNewSalt] = useState('')
+
+    
+    
+    //displays a textbox accordingly
+    const[validUsername, setValidUsername] = useState(true)
+    const[validEmail, setValidEmail] = useState(true)
+    const[validPassword, setValidPassword] = useState(true)
+    
+
+
+
+    const[inModal, setInModal] = useState(false)
+
+
+    /**
+     * Function to handle when the username input box is changed.
+     * @function usernameOnChange
+     * @param {Event} event - The onChange event.
+     */
+
+    //store the onChange values
+    const usernameOnChange= (event) => {
+        setNewUsername(event.target.value)
+    }
+
+
+    /**
+     * Function to handle when the email input box is changed.
+     * @function emailOnChange
+     * @param {Event} event - The onChange event.
+     */
+
+    const emailOnChange = (event) => {
+        setNewEmail(event.target.value)
+    }
+
+    /**
+     * Function to handle when the password input box is changed.
+     * @function passwordOnChange
+     * @param {Event} event - The onChange event.
+     */
+
+    const passwordOnChange = (event) => {
+        setNewPassword(event.target.value)
+    }
+
+    /**
+     * Function to handle when the reenter password input box is changed.
+     * @function password2OnChange
+     * @param {Event} event - The onChange event.
+     */
+    const password2OnChange = (event) => {
+        checkVerifyNewPassword(event.target.value)
+    }
+
+
+
+    /**
+     * Function to handle when the user cancels the update.
+     * @function handleCancel
+     * 
+     */
+
+    //if the input boxes are empty, then the data will remain unchanged
+    //setting the 'new' variables to the original variables
+    const handleCancel = () => {
+        setNewUsername('')
+        setNewEmail('')
+        setNewPassword('')
+        checkVerifyNewPassword('')
+
+        setValidUsername(true)
+        setValidEmail(true)
+        setValidPassword(true)
+        toggleModal()
+
+    }
+    /**
+     * Function to handle when the user saves the update.
+     * @function handleSave
+     * 
+     */
+
+    const handleSave =  () => {
+
+        console.log('handleSaved Called')
+        
+
+        //return a boolean if the email or username is available
+        if (newUsername === ''){
+            setValidUsername(true)
+        }
+        if (newEmail === ''){
+            setValidEmail(true)
+        }
+
+        if(newPassword !== verifyNewPassword){
+            setValidPassword(false)
+        }
+        else if (newPassword === verifyNewPassword){
+            setValidPassword(true)
+            
+        } 
+
+
+    }
+
+    /**
+     * Function to handle the validity of the user info.
+     * checks if the new username, email, and password are valid/available
+     * @function validInfo
+     * 
+     */
+
+    const validInfo =  () => {
+
+        console.log("validInfo called")
+        console.log(validUsername,validEmail,validPassword)
+        if (validUsername &amp;&amp; validEmail&amp;&amp; validPassword){
+            console.log('everything is valid')
+            
+            sessionStorage.setItem("userinfo", updateEmail);
+            console.log(newEmail,'new email')
+            updateInfo();
+            toggleModal()
+            setNewUsername('')
+            setNewEmail('')
+            setNewPassword('')
+            checkVerifyNewPassword('')
+            window.location.reload(false);
+            
+        }
+    }
+
+    /**
+     * A React hook to checks if the input boxes' values are changed.
+     *
+     * @memberof module:React
+     */
+
+    useEffect(() => {
+
+        if (!render.current) {
+
+        if (newUsername === ''){
+            setValidUsername(true)
+            setUpdateUsername(userName)
+
+        }
+
+        if (newEmail === ''){
+            setValidEmail(true)
+            setUpdateEmail(email)
+        }
+
+        if(newPassword === ''){
+            setNewSalt(salt)
+            setNewHash(password)
+        }
+
+        else if (newPassword !== ''){
+             //hash the password
+            const salt = bcrypt.genSaltSync(10)
+            const hash = bcrypt.hashSync(newPassword,salt)
+            setNewHash(hash)
+            setNewSalt(salt)
+            
+        }  
+    }
+
+
+    }, [validPassword,newPassword,updateUsername,updateEmail,handleSave]);
+
+
+
+
+    //display the update modal
+    const [modal,setModal] = useState(false)
+
+
+    /**
+     * Function to toggle the update modal.
+     * @function toggleModal
+     * 
+     */
+    const toggleModal = () =>{
+        setModal(!modal)
+    }
+    //stops the page from scrolling when the modal is displayed
+    if(modal) {
+        document.body.classList.add('active-modal')
+        } else {
+        document.body.classList.remove('active-modal')
+        }
+    
+
+    //fetch user data from database
+    let userEmail =  sessionStorage.getItem("userinfo");
+
+
+        
+    /**
+     * A React hook to fetch the user data from the database and to see if the updated username and email are available in the database.
+     *
+     * @memberof module:React
+     */
+
+    useEffect(() => {
+        if (!hasRender.current) {
+
+            /**
+             * Function to get the user info from the database to display on the account page.
+             * @async
+             * @function fetchUserData
+             * 
+             */
+            const fetchUserData = async () => {
+            try {
+                const response = await fetch(`/users/userInfo/${userEmail}`,{method: 'GET'});
+                const userData = await response.json()
+                console.log('User Data:', userData)
+                getUsername(userData.username)
+                getEmail(userData.email)
+                getUserID(userData.id)
+                getPassword(userData.password)
+                getSalt(userData.salt)
+                setUpdateEmail(userData.email)
+                setUpdateUsername(userData.username)
+            } catch (error) {
+            console.error('Error fetching user data:', error)
+            }
+            }
+            fetchUserData()
+            hasRender.current = true;
+
+        }
+    
+        try{
+
+            if(inModal){
+                if(newUsername !== ''){
+
+                    /**
+                     * Function to check if the updated username is available in the database.
+                     * @async
+                     * @function checkUsernameAvailability
+                     * 
+                     */
+
+                    const checkUsernameAvailability = async () => {
+                        try {
+                            const response = await fetch (`/users/checkusername/${newUsername}`,{method: 'GET'})
+                            const data  = await response.json()
+                            setValidUsername(data)
+                            if(data){
+                                setUpdateUsername(newUsername)
+                            }
+
+                        }
+                        catch (error) {
+                            console.error('Error checking username availability:', error)
+                            }
+                        }
+                        checkUsernameAvailability()
+                    }
+                    
+            if(newEmail !== ''){
+
+                /**
+                 * Function to check if the updated username is available in the database.
+                 * @async
+                 * @function checkEmailAvailability
+                 * 
+                 */
+                const checkEmailAvailability = async () => {
+                    try{
+                        const response = await fetch (`/users/checkemail/${newEmail}`,{method: 'GET'})
+                        const data = await response.json()
+                        setValidEmail(data)
+                        if(data){
+                            setUpdateEmail(newEmail)
+                        }
+                    }
+                    catch (error) {
+                        console.error('Error checking email availability:', error)
+                    }
+                }
+                checkEmailAvailability()
+
+            }
+            if(newPassword !== verifyNewPassword){
+                setValidPassword(false)
+            }
+            else if (newPassword === verifyNewPassword){
+                setValidPassword(true)
+                
+            }
+            
+            }
+        }
+        
+        catch (error){
+            console.error('Error fetching user data:', error)
+        }
+
+        })
+
+
+
+
+
+    /**
+     * Function to update the user info in the database.
+     * @async
+     * @function updateInfo
+     * 
+     */
+    
+    const updateInfo = async () => {
+        try{
+
+            let option = {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json;charset=utf-8'
+                },
+
+                body: JSON.stringify({
+                    'id': userID,
+                    'username': updateUsername,
+                    'email': updateEmail,
+                    'password': newHash,
+                    'salt': newSalt,
+                })
+            }
+        
+            const response = await fetch(`/users/id/${userID}`,option)
+            const data = await response.json()
+            console.log('User Data:', data)
+        } 
+        catch (error) {  
+            console.error('Error updating user data:', error)
+        }
+    }
+        
+    return (
+    &lt;div className="account-container">
+        &lt;SideBar />
+        &lt;div className="account">
+            &lt;div className="account-user">
+                &lt;div className="account-pic-container">
+                    &lt;div className="account-pic">
+                    &lt;FaceIcon sx={{ fontSize: 150 }}/> 
+                    &lt;/div>
+
+                &lt;/div>
+                &lt;div className="account-user-info">
+                    &lt;div className="userName-container">
+                        &lt;p>Username:&lt;/p>
+                        &lt;div className="account-username">&lt;h2>{userName}&lt;/h2>&lt;/div>
+                    &lt;/div>
+                    &lt;div className="userName-container">
+                        &lt;p>Email:&lt;/p>
+                        &lt;div className="account-username">&lt;h2>{email}&lt;/h2>&lt;/div>
+                    &lt;/div>
+                &lt;/div>
+
+                &lt;button onClick={()=>{
+                    toggleModal();
+                    setInModal(true);
+                }} className="btn-modal">
+                Edit Profile
+                &lt;/button>
+
+                {/* show and hide the update modal  */}
+                {modal &amp;&amp; (
+                &lt;div className="modal">
+                    &lt;div onClick={handleCancel} className="overlay">&lt;/div>
+                    &lt;div className="modal-content">
+                    &lt;h2>Update Info&lt;/h2>
+                    &lt;p>Leave fields blank if want to remain unchanged&lt;/p>
+                    &lt;div className="update-info-div">
+
+                        &lt;input
+                        name="username-input"
+                        className="update-input-box"
+                        type="text"
+                        placeholder='username'
+                        value={newUsername}
+                        onChange={usernameOnChange}/>
+                        {validUsername ? null : &lt;p className="error-message">username is not available&lt;/p>}
+                        
+                        &lt;input 
+                        name="email-input"
+                        className="update-input-box"
+                        type="text" 
+                        placeholder='email'
+                        value={newEmail}
+                        onChange={emailOnChange}/>
+                        {validEmail ? null : &lt;p className="error-message">email is not available&lt;/p>}
+
+                        &lt;input 
+                        name="password-input"
+                        className="update-input-box"
+                        type="password"
+                        placeholder="password" 
+                        value={newPassword}
+                        onChange={passwordOnChange}/>
+
+                        &lt;input
+                        name="password2-input"
+                        className="update-input-box"
+                        type="password"
+                        placeholder="reenter password"
+                        onChange={password2OnChange} />
+                        {validPassword ? null : &lt;p className="error-message">passwords do not match&lt;/p>}
+
+
+                    &lt;/div>
+
+                    &lt;button className="save-modal" onClick={()=>{
+                        handleSave();
+                        validInfo()
+
+                    
+
+                        
+                    }}>
+                    save&lt;/button>
+                    &lt;button className="close-modal" onClick={()=>{
+                        handleCancel();
+                        setInModal(false);
+                    }}>
+                        cancel
+                    &lt;/button>
+
+                    &lt;/div>
+                &lt;/div>
+                )}
+
+            &lt;/div>
+
+
+            &lt;div className="account-more-info">
+                &lt;div className="account-more-info-container">
+                    &lt;h2>More Info&lt;/h2>
+                    &lt;h3>PurrfectPets is powered PetFinder&lt;/h3>
+                    &lt;p>To learn more about PetFinder, &lt;a href="https://www.petfinder.com/" target="blank">click here!&lt;/a>&lt;/p>
+                    &lt;br />
+                    &lt;h3>Have a candidate for PurrfectPets?&lt;/h3>
+                    &lt;p>Do you or someone you know have a pet that is in need of their perfect owner?&lt;/p>
+                    &lt;p>PetFinder has resources that can help a pet find a new home&lt;/p>
+                    &lt;p>To learn more about rehoming a pet,  &lt;a href="https://www.petfinder.com/adopt-or-get-involved/adopting-pets/rehoming/" target="blank">click here!&lt;/a>&lt;/p>
+
+
+
+                &lt;/div>
+
+            &lt;/div>
+
+        &lt;/div>
+
+    &lt;/div>
+    )
+
+    }
+
+
+
+
+export default Account;
+
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#Account">Account</a></li><li><a href="global.html#App">App</a></li><li><a href="global.html#arePasswordsEqual">arePasswordsEqual</a></li><li><a href="global.html#checkEmailAvailability">checkEmailAvailability</a></li><li><a href="global.html#checkUsernameAvailability">checkUsernameAvailability</a></li><li><a href="global.html#decodeHtmlEntity">decodeHtmlEntity</a></li><li><a href="global.html#detectTabKeyDown">detectTabKeyDown</a></li><li><a href="global.html#Element">Element</a></li><li><a href="global.html#emailOnChange">emailOnChange</a></li><li><a href="global.html#emailValue">emailValue</a></li><li><a href="global.html#fetchUserData">fetchUserData</a></li><li><a href="global.html#fetchUserEmail">fetchUserEmail</a></li><li><a href="global.html#fetchUserUsername">fetchUserUsername</a></li><li><a href="global.html#getPreferences">getPreferences</a></li><li><a href="global.html#handleCancel">handleCancel</a></li><li><a href="global.html#handleDislike">handleDislike</a></li><li><a href="global.html#handleLike">handleLike</a></li><li><a href="global.html#handleSave">handleSave</a></li><li><a href="global.html#Likes">Likes</a></li><li><a href="global.html#LocationGetter">LocationGetter</a></li><li><a href="global.html#LoginSignup">LoginSignup</a></li><li><a href="global.html#NavBar">NavBar</a></li><li><a href="global.html#nextPet">nextPet</a></li><li><a href="global.html#password2OnChange">password2OnChange</a></li><li><a href="global.html#passwordDatabaseCheck">passwordDatabaseCheck</a></li><li><a href="global.html#passwordOnChange">passwordOnChange</a></li><li><a href="global.html#passwordValue">passwordValue</a></li><li><a href="global.html#passwordValue2">passwordValue2</a></li><li><a href="global.html#pref_changer">pref_changer</a></li><li><a href="global.html#SideBar">SideBar</a></li><li><a href="global.html#toggleModal">toggleModal</a></li><li><a href="global.html#updateInfo">updateInfo</a></li><li><a href="global.html#usernameOnChange">usernameOnChange</a></li><li><a href="global.html#usernameValue">usernameValue</a></li><li><a href="global.html#UserPreferences">UserPreferences</a></li><li><a href="global.html#validInfo">validInfo</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Dec 08 2023 14:44:33 GMT+0000 (Coordinated Universal Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
