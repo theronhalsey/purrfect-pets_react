@@ -5,9 +5,7 @@ name: Generate Design Docs
 on:
   push:
     branches:
-      - Dev
-      - Production
-      - theron-dev
+      - main
   workflow_dispatch:
     
 jobs:
